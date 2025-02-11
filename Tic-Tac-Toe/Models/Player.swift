@@ -12,6 +12,10 @@ enum Player {
     case x
     case o
 
+    var opponent: Player {
+        self == .o ? .x : .o
+    }
+
     var symbol: String {
         switch self {
         case .x:
@@ -19,9 +23,5 @@ enum Player {
         case .o:
             return "O"
         }
-    }
-
-    mutating func toggle() {
-        self = self == .o ? .x : .o
     }
 }

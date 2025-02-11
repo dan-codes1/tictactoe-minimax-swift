@@ -9,51 +9,48 @@
 import Foundation
 
 final class GameViewModel: ObservableObject {
-    @Published var board: [[Player?]]
+    @Published var state: GameState
     @Published private(set) var ai: Player
     @Published private(set) var human: Player
-    @Published private(set) var currentPlayerTurn: Player
+    @Published private(set) var currentPlayer: Player
     @Published private(set) var winner: Player?
-    private var game: GameEngine
 
     init() {
         let board: [[Player?]] = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
         let randInt = Int.random(in: 0...1)
         let human: Player = randInt == 0 ? .x : .o
         let ai: Player = randInt == 0 ? .o : .x
-        self.board = board
-        self.currentPlayerTurn = .x
+        self.state = board
+        self.currentPlayer = .x
         self.human = human
         self.ai = ai
-        self.game = .init(human: human, ai: ai)
-        if currentPlayerTurn == ai {
+        if currentPlayer == ai {
             playForAI()
         }
     }
 
     var gameOver: Bool {
-        return board.flatMap { $0 }.contains(nil) == false || winner != nil
+        return state.flatMap { $0 }.contains(nil) == false || winner != nil
     }
 
     func playMove(_ move: Move) {
-        guard board[move.row][move.col] == nil && currentPlayerTurn == human && !gameOver else {
+        guard state[move.row][move.col] == nil && currentPlayer == human && !gameOver else {
             return
         }
-        board[move.row][move.col] = human
+        state[move.row][move.col] = human
         checkForWinner()
-        currentPlayerTurn.toggle()
+        currentPlayer = currentPlayer.opponent
         playForAI()
     }
 
     func resetGame() {
-        self.board = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
-        self.currentPlayerTurn = .x
+        self.state = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
+        self.currentPlayer = .x
         let randInt = Int.random(in: 0...1)
         self.human = randInt == 0 ? .x : .o
         self.ai = randInt == 0 ? .o : .x
-        self.game = .init(human: human, ai: ai)
         winner = nil
-        if currentPlayerTurn == ai {
+        if currentPlayer == ai {
             playForAI()
         }
     }
@@ -61,45 +58,47 @@ final class GameViewModel: ObservableObject {
 
 private extension GameViewModel {
     func configure() {
-        board = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
+        state = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
     }
 
     func playForAI() {
-        guard currentPlayerTurn == ai && !gameOver else {
+        guard currentPlayer == ai && !gameOver else {
             return
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
             guard let self else {
                 return
             }
-            if let aiMove = game.findBestMove(in: board) {
-                board[aiMove.row][aiMove.col] = ai
+            let engine = GameSearchEngine()
+            if let move = engine.searchMove(for: ai, in: state) {
+                print(move)
+                state[move.row][move.col] = ai
                 checkForWinner()
             }
-            currentPlayerTurn.toggle()
+            currentPlayer = currentPlayer.opponent
         }
     }
 
     func checkForWinner() {
         // Row & Column Check
         for i in 0..<3 {
-            if board[i][0] == board[i][1], board[i][1] == board[i][2] {
-                winner = board[i][0]
+            if state[i][0] == state[i][1], state[i][1] == state[i][2] {
+                winner = state[i][0]
                 return
             }
-            if board[0][i] == board[1][i], board[1][i] == board[2][i] {
-                winner = board[0][i]
+            if state[0][i] == state[1][i], state[1][i] == state[2][i] {
+                winner = state[0][i]
                 return
             }
         }
 
         // Diagonal Check
-        if board[0][0] == board[1][1], board[1][1] == board[2][2] {
-            winner = board[0][0]
+        if state[0][0] == state[1][1], state[1][1] == state[2][2] {
+            winner = state[0][0]
             return
         }
-        if board[0][2] == board[1][1], board[1][1] == board[2][0] {
-            winner = board[0][2]
+        if state[0][2] == state[1][1], state[1][1] == state[2][0] {
+            winner = state[0][2]
             return
         }
     }

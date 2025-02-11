@@ -21,7 +21,7 @@ struct GameView: View {
                 Button {
                     viewModel.playMove(Move(row: row, col: col))
                 } label: {
-                    Text(viewModel.board[row][col]?.symbol ?? "")
+                    Text(viewModel.state[row][col]?.symbol ?? "")
                         .font(.largeTitle)
                         .frame(width: 80, height: 80)
                         .background(Color.gray.opacity(0.3))
@@ -55,7 +55,7 @@ struct GameView: View {
             .padding()
         }
         .animation(.default, value: viewModel.gameOver)
-        .animation(.default, value: viewModel.currentPlayerTurn)
+        .animation(.default, value: viewModel.currentPlayer)
 
     }
 
@@ -63,7 +63,7 @@ struct GameView: View {
 
 private extension GameView {
     var currPlayerText: String {
-        if viewModel.currentPlayerTurn == viewModel.human {
+        if viewModel.currentPlayer == viewModel.human {
             return "You"
         }
         return "AI"
