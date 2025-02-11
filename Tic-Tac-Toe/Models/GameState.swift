@@ -11,13 +11,18 @@ import Foundation
 typealias GameState = [[Player?]]
 
 extension GameState {
+    mutating func play(_ move: Move, for player: Player) {
+        self[move.row][move.col] = player
+    }
+
     func possibleMoves(for player: Player) -> [(Move, GameState)] {
         var moves: [(Move, GameState)] = []
         for row in 0..<3 {
             for col in 0..<3 {
-                if canPlay(move: .init(row: row, col: col)) {
+                let move = Move(row: row, col: col)
+                if canPlay(move: move) {
                     var newState = self
-                    newState[row][col] = player
+                    newState.play(move, for: player)
                     moves.append((Move(row: row, col: col), newState))
                 }
             }

@@ -34,10 +34,10 @@ final class GameViewModel: ObservableObject {
     }
 
     func playMove(_ move: Move) {
-        guard state[move.row][move.col] == nil && currentPlayer == human && !gameOver else {
+        guard state.canPlay(move: move) && currentPlayer == human && !gameOver else {
             return
         }
-        state[move.row][move.col] = human
+        state.play(move, for: human)
         checkForWinner()
         currentPlayer = currentPlayer.opponent
         playForAI()
@@ -71,8 +71,7 @@ private extension GameViewModel {
             }
             let engine = GameSearchEngine()
             if let move = engine.searchMove(for: ai, in: state) {
-                print(move)
-                state[move.row][move.col] = ai
+                state.play(move, for: ai)
                 checkForWinner()
             }
             currentPlayer = currentPlayer.opponent
