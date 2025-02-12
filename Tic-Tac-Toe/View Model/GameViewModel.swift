@@ -13,7 +13,6 @@ final class GameViewModel: ObservableObject {
     @Published private(set) var ai: Player
     @Published private(set) var human: Player
     @Published private(set) var currentPlayer: Player
-    @Published private(set) var winner: Player?
 
     init() {
         let board: [[Player?]] = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
@@ -30,7 +29,11 @@ final class GameViewModel: ObservableObject {
     }
 
     var gameOver: Bool {
-        return state.flatMap { $0 }.contains(nil) == false || winner != nil
+        state.isTerminal()
+    }
+
+    var winner: Player? {
+        state.winner()
     }
 
     func playMove(_ move: Move) {
@@ -38,7 +41,6 @@ final class GameViewModel: ObservableObject {
             return
         }
         state.play(move, for: human)
-        checkForWinner()
         currentPlayer = currentPlayer.opponent
         playForAI()
     }
@@ -49,7 +51,6 @@ final class GameViewModel: ObservableObject {
         let randInt = Int.random(in: 0...1)
         self.human = randInt == 0 ? .x : .o
         self.ai = randInt == 0 ? .o : .x
-        winner = nil
         if currentPlayer == ai {
             playForAI()
         }
@@ -72,13 +73,9 @@ private extension GameViewModel {
             let engine = GameSearchEngine(randomize: true)
             if let move = engine.searchMove(for: ai, in: state) {
                 state.play(move, for: ai)
-                checkForWinner()
             }
             currentPlayer = currentPlayer.opponent
         }
     }
 
-    func checkForWinner() {
-        winner = state.winner()
-    }
 }
