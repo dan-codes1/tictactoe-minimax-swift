@@ -8,19 +8,20 @@
 
 struct GameSearchEngine {
     func searchMove(for player: Player, in state: GameState) -> Move? {
-        maxValue(for: player, in: state).move
+        maxValue(for: player, in: state, with: 0).move
     }
 }
 
 private extension GameSearchEngine {
-    func maxValue(for player: Player, in state: GameState) -> (utility: Int, move: Move?) {
-        if state.isTerminal() {
+    func maxValue(for player: Player, in state: GameState, with depth: Int) -> (utility: Int, move: Move?) {
+        guard state.isTerminal() == false else {
             return (state.utility(for: player), nil)
         }
         var value = Int.min
         var bestMove: Move? = nil
-        for (m1, s1) in state.possibleMoves(for: player) {
-            let (v1, _) = minValue(for: player, in: s1)
+        let possibleMoves = state.possibleMoves(for: player)
+        for (m1, s1) in possibleMoves {
+            let (v1, _) = minValue(for: player, in: s1, with: depth + 1)
             if v1 > value {
                 value = v1
                 bestMove = m1
@@ -29,14 +30,15 @@ private extension GameSearchEngine {
         return (value, bestMove)
     }
 
-    func minValue(for player: Player, in state: GameState) -> (utility: Int, move: Move?) {
-        if state.isTerminal() {
+    func minValue(for player: Player, in state: GameState, with depth: Int) -> (utility: Int, move: Move?) {
+        guard state.isTerminal() == false else {
             return (state.utility(for: player), nil)
         }
         var value = Int.max
         var bestMove: Move? = nil
-        for (m1, s1) in state.possibleMoves(for: player.opponent) {
-            let (v1, _) = maxValue(for: player, in: s1)
+        let possibleMoves = state.possibleMoves(for: player.opponent)
+        for (m1, s1) in possibleMoves {
+            let (v1, _) = maxValue(for: player, in: s1, with: depth + 1)
             if v1 < value {
                 value = v1
                 bestMove = m1

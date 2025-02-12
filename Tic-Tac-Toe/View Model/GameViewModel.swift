@@ -79,26 +79,6 @@ private extension GameViewModel {
     }
 
     func checkForWinner() {
-        // Row & Column Check
-        for i in 0..<3 {
-            if state[i][0] == state[i][1], state[i][1] == state[i][2] {
-                winner = state[i][0]
-                return
-            }
-            if state[0][i] == state[1][i], state[1][i] == state[2][i] {
-                winner = state[0][i]
-                return
-            }
-        }
-
-        // Diagonal Check
-        if state[0][0] == state[1][1], state[1][1] == state[2][2] {
-            winner = state[0][0]
-            return
-        }
-        if state[0][2] == state[1][1], state[1][1] == state[2][0] {
-            winner = state[0][2]
-            return
-        }
+        winner = state.winner()
     }
 }
