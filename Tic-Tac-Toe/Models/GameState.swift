@@ -12,7 +12,7 @@ typealias GameState = [[Player?]]
 
 extension GameState {
     var isTerminal: Bool {
-        return winner != nil || !flatMap { $0 }.contains(nil)
+        return winner != nil || flatMap { $0 }.contains(nil) == false
     }
 
     var winner: Player? {
@@ -66,6 +66,13 @@ extension GameState {
             return 0
         }
         return winner == player ? 1 : -1
+    }
+
+    func utility(for player: Player, at depth: Int, maxDepth: Int) -> Int {
+        guard let winner = winner else {
+            return 0
+        }
+        return winner == player ? maxDepth - depth : -maxDepth + depth
     }
 
 }
