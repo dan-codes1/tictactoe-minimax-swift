@@ -18,7 +18,7 @@ struct GameSearchEngine {
 private extension GameSearchEngine {
     func maxValue(for player: Player, in state: GameState, with depth: Int) -> (utility: Int, move: Move?) {
         guard state.isTerminal == false && depth < maxDepth else {
-            return (state.utility(for: player, at: depth, maxDepth: maxDepth), nil)
+            return (state.utility(for: player), nil)
         }
         var value = Int.min
         /// All the possible moves with their associated values
@@ -43,7 +43,7 @@ private extension GameSearchEngine {
 
     func minValue(for player: Player, in state: GameState, with depth: Int) -> (utility: Int, move: Move?) {
         guard state.isTerminal == false && depth < maxDepth else {
-            return (state.utility(for: player, at: depth, maxDepth: maxDepth), nil)
+            return (state.utility(for: player), nil)
         }
         var value = Int.max
         var bestMove: Move? = nil
