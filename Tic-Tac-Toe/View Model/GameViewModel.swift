@@ -28,7 +28,9 @@ final class GameViewModel: ObservableObject {
         self.searchEngine = GameSearchEngine(randomize: true)
         self.isSearchingAIMove = false
         if currentPlayer == ai {
-            playForAI()
+            Task {
+                await playForAI(delay: .now())
+            }
         }
     }
 
@@ -46,7 +48,9 @@ final class GameViewModel: ObservableObject {
         }
         state.play(move, for: human)
         currentPlayer = currentPlayer.opponent
-        playForAI()
+        Task {
+            await playForAI()
+        }
     }
 
     func resetGame() {
@@ -56,7 +60,9 @@ final class GameViewModel: ObservableObject {
         ai = randInt == 0 ? .o : .x
         currentPlayer = .x
         if currentPlayer == ai {
-            playForAI()
+            Task {
+                await playForAI(delay: .now())
+            }
         }
     }
 }
@@ -66,20 +72,21 @@ private extension GameViewModel {
         state = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
     }
 
-    func playForAI() {
+    func playForAI(delay: DispatchTime = .now() + 0.8) async {
         guard currentPlayer == ai && !gameOver && !isSearchingAIMove else {
             return
         }
         isSearchingAIMove = true
-        Task {
-            let move = searchEngine.searchMove(for: ai, in: state)
-            await MainActor.run {
-                if let move = move {
-                    state.play(move, for: ai)
-                }
-                currentPlayer = currentPlayer.opponent
-                isSearchingAIMove = false
+        let move = searchEngine.searchMove(for: ai, in: state)
+        DispatchQueue.main.asyncAfter(deadline: delay) { [weak self] in
+            guard let self else {
+                return
             }
+            if let move = move {
+                state.play(move, for: ai)
+            }
+            currentPlayer = currentPlayer.opponent
+            isSearchingAIMove = false
         }
     }
 }
