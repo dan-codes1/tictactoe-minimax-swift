@@ -9,35 +9,39 @@
 import Foundation
 
 final class GameViewModel: ObservableObject {
-    @Published var state: GameState
+    @Published private(set) var state: GameState
     @Published private(set) var ai: Player
     @Published private(set) var human: Player
     @Published private(set) var currentPlayer: Player
+    private var isSearchingAIMove: Bool
+    private let searchEngine: GameSearchEngine
 
     init() {
-        let board: [[Player?]] = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
+        let state: [[Player?]] = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
         let randInt = Int.random(in: 0...1)
         let human: Player = randInt == 0 ? .x : .o
         let ai: Player = randInt == 0 ? .o : .x
-        self.state = board
-        self.currentPlayer = .x
+        self.state = state
         self.human = human
         self.ai = ai
+        self.currentPlayer = .x
+        self.searchEngine = GameSearchEngine(randomize: true)
+        self.isSearchingAIMove = false
         if currentPlayer == ai {
             playForAI()
         }
     }
 
     var gameOver: Bool {
-        state.isTerminal()
+        state.isTerminal
     }
 
     var winner: Player? {
-        state.winner()
+        state.winner
     }
 
     func playMove(_ move: Move) {
-        guard state.canPlay(move: move) && currentPlayer == human && !gameOver else {
+        guard state.canPlay(move) && currentPlayer == human && !gameOver else {
             return
         }
         state.play(move, for: human)
@@ -46,11 +50,11 @@ final class GameViewModel: ObservableObject {
     }
 
     func resetGame() {
-        self.state = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
-        self.currentPlayer = .x
         let randInt = Int.random(in: 0...1)
-        self.human = randInt == 0 ? .x : .o
-        self.ai = randInt == 0 ? .o : .x
+        state.reset()
+        human = randInt == 0 ? .x : .o
+        ai = randInt == 0 ? .o : .x
+        currentPlayer = .x
         if currentPlayer == ai {
             playForAI()
         }
@@ -63,19 +67,19 @@ private extension GameViewModel {
     }
 
     func playForAI() {
-        guard currentPlayer == ai && !gameOver else {
+        guard currentPlayer == ai && !gameOver && !isSearchingAIMove else {
             return
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
-            guard let self else {
-                return
+        isSearchingAIMove = true
+        Task {
+            let move = searchEngine.searchMove(for: ai, in: state)
+            await MainActor.run {
+                if let move = move {
+                    state.play(move, for: ai)
+                }
+                currentPlayer = currentPlayer.opponent
+                isSearchingAIMove = false
             }
-            let engine = GameSearchEngine(randomize: true)
-            if let move = engine.searchMove(for: ai, in: state) {
-                state.play(move, for: ai)
-            }
-            currentPlayer = currentPlayer.opponent
         }
     }
-
 }

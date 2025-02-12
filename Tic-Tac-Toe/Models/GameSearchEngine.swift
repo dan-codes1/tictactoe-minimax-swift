@@ -16,7 +16,7 @@ struct GameSearchEngine {
 
 private extension GameSearchEngine {
     func maxValue(for player: Player, in state: GameState, with depth: Int) -> (utility: Int, move: Move?) {
-        guard state.isTerminal() == false else {
+        guard state.isTerminal == false else {
             return (state.utility(for: player), nil)
         }
         var value = Int.min
@@ -41,7 +41,7 @@ private extension GameSearchEngine {
     }
 
     func minValue(for player: Player, in state: GameState, with depth: Int) -> (utility: Int, move: Move?) {
-        guard state.isTerminal() == false else {
+        guard state.isTerminal == false else {
             return (state.utility(for: player), nil)
         }
         var value = Int.max

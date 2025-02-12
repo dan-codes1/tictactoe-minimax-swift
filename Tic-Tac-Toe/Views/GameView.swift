@@ -55,10 +55,7 @@ struct GameView: View {
 
 private extension GameView {
     var currPlayerText: String {
-        if viewModel.currentPlayer == viewModel.human {
-            return "You"
-        }
-        return "AI"
+        viewModel.currentPlayer == viewModel.human ? "You" : "AI"
     }
 
     var gameOverText: String {
