@@ -30,19 +30,11 @@ struct GameView: View {
             }
 
             if viewModel.gameOver {
-                if viewModel.winner == viewModel.ai {
-                    Text("AI Won!")
-                        .padding()
-                } else if viewModel.winner == viewModel.human {
-                    Text("You Won!")
-                        .padding()
-                } else {
-                    Text("Draw!")
-                        .padding()
-                }
+                Text(gameOverText)
+                    .padding()
             } else {
                 HStack {
-                    Text("Player turn: ")
+                    Text("Player turn:")
                     Text(currPlayerText)
                         .fontWeight(.medium)
                 }
@@ -67,6 +59,13 @@ private extension GameView {
             return "You"
         }
         return "AI"
+    }
+
+    var gameOverText: String {
+        guard let winner = viewModel.winner else {
+            return "Draw!"
+        }
+        return winner == viewModel.ai ? "AI Won!" : "You Won!"
     }
 }
 
