@@ -67,12 +67,4 @@ extension GameState {
         }
         return winner == player ? 1 : -1
     }
-
-    func utility(for player: Player, at depth: Int, maxDepth: Int) -> Int {
-        guard let winner = winner else {
-            return 0
-        }
-        return winner == player ? maxDepth - depth : -maxDepth + depth
-    }
-
 }
