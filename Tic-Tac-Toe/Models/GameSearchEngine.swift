@@ -7,6 +7,8 @@
 //
 
 struct GameSearchEngine {
+    /// - Note: Randomizing may lead to less quality results.
+    var randomize = false
     func searchMove(for player: Player, in state: GameState) -> Move? {
         maxValue(for: player, in: state, with: 0).move
     }
@@ -18,6 +20,8 @@ private extension GameSearchEngine {
             return (state.utility(for: player), nil)
         }
         var value = Int.min
+        /// All the possible moves with their associated values
+        var moves: [(val: Int, move: Move)] = []
         var bestMove: Move? = nil
         let possibleMoves = state.possibleMoves(for: player)
         for (m1, s1) in possibleMoves {
@@ -26,6 +30,12 @@ private extension GameSearchEngine {
                 value = v1
                 bestMove = m1
             }
+            moves.append((v1, m1))
+        }
+        if randomize && depth == 0 { // only randomize the final moves in the search
+            let bestRandomizedMoves = moves.filter({ $0.val == value }).shuffled()
+            let bestRandomizedMove = bestRandomizedMoves.first ?? (0, nil)
+            return (bestRandomizedMove.0, bestRandomizedMove.1)
         }
         return (value, bestMove)
     }

@@ -69,7 +69,7 @@ private extension GameViewModel {
             guard let self else {
                 return
             }
-            let engine = GameSearchEngine()
+            let engine = GameSearchEngine(randomize: true)
             if let move = engine.searchMove(for: ai, in: state) {
                 state.play(move, for: ai)
                 checkForWinner()
