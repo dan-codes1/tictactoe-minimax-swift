@@ -9,12 +9,18 @@
 import Foundation
 
 final class GameViewModel: ObservableObject {
+    @Published var difficulty: Difficulty {
+        didSet {
+            searchEngine.randomize = difficulty == .normal
+            resetGame()
+        }
+    }
     @Published private(set) var state: GameState
     @Published private(set) var ai: Player
     @Published private(set) var human: Player
     @Published private(set) var currentPlayer: Player
     private var isSearchingAIMove: Bool
-    private let searchEngine: GameSearchEngine
+    private var searchEngine: GameSearchEngine
 
     init() {
         let state: [[Player?]] = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
@@ -26,10 +32,11 @@ final class GameViewModel: ObservableObject {
         self.ai = ai
         self.currentPlayer = .x
         self.searchEngine = GameSearchEngine(randomize: true)
+        self.difficulty = .normal
         self.isSearchingAIMove = false
         if currentPlayer == ai {
             Task {
-                await playForAI(delay: .now())
+                await playForAI()
             }
         }
     }
@@ -39,7 +46,11 @@ final class GameViewModel: ObservableObject {
     }
 
     var winner: Player? {
-        state.winner
+        winnerInfo.player
+    }
+
+    var winningCells: [(Int, Int)] {
+        winnerInfo.cells
     }
 
     func playMove(_ move: Move) {
@@ -61,18 +72,22 @@ final class GameViewModel: ObservableObject {
         currentPlayer = .x
         if currentPlayer == ai {
             Task {
-                await playForAI(delay: .now())
+                await playForAI()
             }
         }
     }
 }
 
 private extension GameViewModel {
+    var winnerInfo: (player: Player?, cells: [(Int, Int)]) {
+        state.winner
+    }
+
     func configure() {
         state = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
     }
 
-    func playForAI(delay: DispatchTime = .now() + 0.8) async {
+    func playForAI(delay: DispatchTime = .now() + 1.2) async {
         guard currentPlayer == ai && !gameOver && !isSearchingAIMove else {
             return
         }
