@@ -8,7 +8,18 @@
 
 import Foundation
 
-enum Difficulty {
+enum Difficulty: CaseIterable {
     case normal
     case hard
+}
+
+extension Difficulty: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .normal:
+            return "Normal"
+        case .hard:
+            return "Hard"
+        }
+    }
 }

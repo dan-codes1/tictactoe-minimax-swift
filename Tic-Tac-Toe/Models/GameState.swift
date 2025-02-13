@@ -12,26 +12,26 @@ typealias GameState = [[Player?]]
 
 extension GameState {
     var isTerminal: Bool {
-        return winner != nil || flatMap { $0 }.contains(nil) == false
+        return winner.player != nil || flatMap { $0 }.contains(nil) == false
     }
 
-    var winner: Player? {
+    var winner: (player: Player?, cells: [(Int, Int)]) {
         for i in 0..<3 {
             if self[i][0] != nil, self[i][0] == self[i][1], self[i][1] == self[i][2] {
-                return self[i][0]
+                return (self[i][0], [(i, 0), (i, 1), (i, 2)])
             }
             if self[0][i] != nil, self[0][i] == self[1][i], self[1][i] == self[2][i] {
-                return self[0][i]
+                return (self[0][i], [(0, i), (1, i), (2, i)])
             }
         }
 
         if self[0][0] != nil, self[0][0] == self[1][1], self[1][1] == self[2][2] {
-            return self[0][0]
+            return (self[0][0], [(0, 0), (1, 1), (2, 2)])
         }
         if self[0][2] != nil, self[0][2] == self[1][1], self[1][1] == self[2][0] {
-            return self[0][2]
+            return (self[0][2], [(0, 2), (1, 1), (2, 0)])
         }
-        return nil
+        return (nil, [])
     }
 
     mutating func play(_ move: Move, for player: Player) {
@@ -62,7 +62,7 @@ extension GameState {
     }
 
     func utility(for player: Player) -> Int {
-        guard let winner = winner else {
+        guard let winner = winner.player else {
             return 0
         }
         return winner == player ? 1 : -1
