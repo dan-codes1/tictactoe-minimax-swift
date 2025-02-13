@@ -29,7 +29,7 @@ final class GameViewModel: ObservableObject {
         self.isSearchingAIMove = false
         if currentPlayer == ai {
             Task {
-                await playForAI(delay: .now())
+                await playForAI()
             }
         }
     }
@@ -61,7 +61,7 @@ final class GameViewModel: ObservableObject {
         currentPlayer = .x
         if currentPlayer == ai {
             Task {
-                await playForAI(delay: .now())
+                await playForAI()
             }
         }
     }
@@ -72,7 +72,7 @@ private extension GameViewModel {
         state = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
     }
 
-    func playForAI(delay: DispatchTime = .now() + 0.8) async {
+    func playForAI(delay: DispatchTime = .now() + 1.2) async {
         guard currentPlayer == ai && !gameOver && !isSearchingAIMove else {
             return
         }
