@@ -26,7 +26,7 @@ struct GameView: View {
                         .frame(width: 80, height: 80)
                         .background(Color.gray.opacity(0.3))
                         .cornerRadius(10)
-                        .opacity(isWinningCell((row, col)) ? 1 : 0.3)
+                        .opacity(isWinningCell((row, col)) ? 1 : 0.35)
                 }
             }
 
@@ -42,18 +42,6 @@ struct GameView: View {
                 .padding()
             }
 
-            HStack {
-                Text("Difficulty:")
-                Picker("Difficulty", selection: $viewModel.difficulty) {
-                    ForEach(Difficulty.allCases, id: \.self) { difficulty in
-                        Text(difficulty.description)
-                            .id(difficulty)
-                            .tag(difficulty)
-                    }
-                }
-            }
-            .padding()
-
             Button("Reset Game") {
                 viewModel.resetGame()
             }
@@ -61,7 +49,6 @@ struct GameView: View {
         }
         .animation(.default, value: viewModel.gameOver)
         .animation(.default, value: viewModel.currentPlayer)
-        .animation(.default, value: viewModel.difficulty)
     }
 
 }
