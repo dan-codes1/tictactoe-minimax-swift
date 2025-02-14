@@ -9,18 +9,12 @@
 import Foundation
 
 final class GameViewModel: ObservableObject {
-    @Published var difficulty: Difficulty {
-        didSet {
-            searchEngine.randomize = difficulty == .normal
-            resetGame()
-        }
-    }
     @Published private(set) var state: GameState
     @Published private(set) var ai: Player
     @Published private(set) var human: Player
     @Published private(set) var currentPlayer: Player
     private var isSearchingAIMove: Bool
-    private var searchEngine: GameSearchEngine
+    private let searchEngine: GameSearchEngine
 
     init() {
         let state: [[Player?]] = [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
@@ -31,8 +25,7 @@ final class GameViewModel: ObservableObject {
         self.human = human
         self.ai = ai
         self.currentPlayer = .x
-        self.searchEngine = GameSearchEngine(randomize: true)
-        self.difficulty = .normal
+        self.searchEngine = GameSearchEngine()
         self.isSearchingAIMove = false
         if currentPlayer == ai {
             Task {
@@ -92,7 +85,13 @@ private extension GameViewModel {
             return
         }
         isSearchingAIMove = true
-        let move = searchEngine.searchMove(for: ai, in: state)
+        let move: Move?
+        if state.flatMap({ $0 }).contains(where: { $0 != nil }) == false {
+            // randomly generate first move for AI
+            move = generateRandomFirstMove()
+        } else {
+            move = searchEngine.searchMove(for: ai, in: state)
+        }
         DispatchQueue.main.asyncAfter(deadline: delay) { [weak self] in
             guard let self else {
                 return
@@ -103,5 +102,11 @@ private extension GameViewModel {
             currentPlayer = currentPlayer.opponent
             isSearchingAIMove = false
         }
+    }
+
+    func generateRandomFirstMove() -> Move {
+        let row = Int.random(in: 0..<3)
+        let col = Int.random(in: 0..<3)
+        return Move(row: row, col: col)
     }
 }
